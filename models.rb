@@ -5,14 +5,42 @@ require './init/redis'
 # [
 #   { x: 5,
 #     y: 8,
-#     type: w },
+#     color: w },
 #   { x: 14,
 #     y: 3,
-#     type: b },
+#     color: b },
 #   ...
 # ]
 class GoGame
   attr_reader :state, :id
+
+  module Colors
+    Black = 0
+    White = 1
+  end
+
+  class << self
+    def key(id)
+      "weiqi-#{id}"
+    end
+
+    def all_ids
+      REDIS.keys("weiqi-*")
+    end
+
+    def size
+      all_ids.size
+    end
+
+    def load(id)
+      json = REDIS.get(key(id))
+      if json.nil?
+        nil
+      else
+        GoGame.new(id, JSON.parse(json))
+      end
+    end
+  end
 
   def initialize(id, state = [])
     @id = id
@@ -20,30 +48,24 @@ class GoGame
   end
 
   def key
-    @id.to_s
+    GoGame.key(@id)
   end
 
   def to_json
     JSON.generate(@state)
   end
 
-  def set(x, y, type)
+  def set(x, y, color)
     s = @state.to_set
-    s.add({ 'x' => x, 'y' => y, 'type' => type})
-    s.to_a
-  end
-
-  def self.load(id)
-    key = id.to_s
-    json = REDIS.get(key)
-    if json.nil?
-      nil
-    else
-      GoGame.new(id, JSON.parse(json))
-    end
+    s.add({ 'x' => x, 'y' => y, 'color' => color })
+    @state = s.to_a
   end
 
   def save
     REDIS.set(key, to_json)
+  end
+
+  def delete
+    REDIS.del(key)
   end
 end
