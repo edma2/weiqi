@@ -1,12 +1,7 @@
 require 'test/unit'
-require 'rack/test'
-require './app'
+require './models'
 
 class GoGameTest < Test::Unit::TestCase
-  def app
-    Sinatra::Application
-  end
-
   def setup
     REDIS.flushdb
   end
