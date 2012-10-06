@@ -21,7 +21,11 @@ class AppTest < Test::Unit::TestCase
   def test_post_and_get_games
     post '/game'
     post '/game'
+
     get '/game'
     assert last_response.body.include?('[0,1]')
+
+    get '/game/0'
+    assert last_response.body.include?('[]')
   end
 end
