@@ -7,7 +7,7 @@ end
 
 get '/game' do
   ids = GoGame.all_ids
-  ids.join("\n")
+  JSON.generate(ids)
 end
 
 post '/game' do

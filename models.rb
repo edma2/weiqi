@@ -28,8 +28,12 @@ class GoGame
       "weiqi-#{id}"
     end
 
+    def id_from_key(key)
+      key[6..-1].to_i
+    end
+
     def all_ids
-      REDIS.keys("weiqi-*")
+      REDIS.keys("weiqi-*").map { |key| id_from_key(key) }
     end
 
     def size
