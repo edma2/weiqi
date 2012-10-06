@@ -49,4 +49,11 @@ class GoGameTest < Test::Unit::TestCase
     g.delete
     assert_equal GoGame.size, 0
   end
+
+  def test_game_unset
+    g = GoGame.new(1)
+    g.set(5, 9, GoGame::Colors::Black)
+    g.unset(5, 9)
+    assert_equal [], g.state
+  end
 end

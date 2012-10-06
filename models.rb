@@ -12,7 +12,7 @@ require './init/redis'
 #   ...
 # ]
 class GoGame
-  attr_reader :state, :id
+  attr_reader :id
 
   module Colors
     Black = 0
@@ -42,7 +42,7 @@ class GoGame
     end
   end
 
-  def initialize(id, state = [])
+  def initialize(id, state = Set.new)
     @id = id
     @state = state
   end
@@ -51,14 +51,16 @@ class GoGame
     GoGame.key(@id)
   end
 
+  def state
+    @state.to_a
+  end
+
   def to_json
-    JSON.generate(@state)
+    JSON.generate(state)
   end
 
   def set(x, y, color)
-    s = @state.to_set
-    s.add({ 'x' => x, 'y' => y, 'color' => color })
-    @state = s.to_a
+    @state.add({ 'x' => x, 'y' => y, 'color' => color })
   end
 
   def save
@@ -67,5 +69,9 @@ class GoGame
 
   def delete
     REDIS.del(key)
+  end
+
+  def unset(x, y)
+    @state.delete_if { |cell| cell['x'] == x && cell['y'] == y }
   end
 end
