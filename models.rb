@@ -20,6 +20,10 @@ class GoGame
   end
 
   class << self
+    def next_id
+      size
+    end
+
     def key(id)
       "weiqi-#{id}"
     end
@@ -42,13 +46,13 @@ class GoGame
     end
   end
 
-  def initialize(id, state = Set.new)
-    @id = id
+  def initialize(id = nil, state = Set.new)
+    @id = id # nil unless saved or fetched from store
     @state = state
   end
 
   def key
-    GoGame.key(@id)
+    @id.nil? ? nil : GoGame.key(@id)
   end
 
   def state
@@ -64,11 +68,12 @@ class GoGame
   end
 
   def save
+    @id = GoGame.next_id
     REDIS.set(key, to_json)
   end
 
   def delete
-    REDIS.del(key)
+    REDIS.del(key) if key
   end
 
   def unset(x, y)
