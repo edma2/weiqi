@@ -41,7 +41,7 @@ class GoGame
       if json.nil?
         nil
       else
-        GoGame.new(id, JSON.parse(json))
+        GoGame.new(id, JSON.parse(json).to_set)
       end
     end
   end
@@ -68,7 +68,7 @@ class GoGame
   end
 
   def save
-    @id = GoGame.next_id
+    @id ||= GoGame.next_id
     REDIS.set(key, to_json)
   end
 

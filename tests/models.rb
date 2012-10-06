@@ -13,12 +13,12 @@ class GoGameTest < Test::Unit::TestCase
 
   def test_save_load
     g1 = GoGame.new
-    g1.set(2, 3, 'w')
+    g1.set(2, 3, GoGame::Colors::White)
 
     g2 = GoGame.new
-    g2.set(4, 13, 'b')
+    g2.set(4, 13, GoGame::Colors::White)
 
-    assert_equal 0, GoGame.all_ids.size
+    assert_equal 0, GoGame.size
 
     g1.save
     assert_equal 1, GoGame.next_id
@@ -28,6 +28,18 @@ class GoGameTest < Test::Unit::TestCase
     games_match(g2, GoGame.load(1))
 
     assert_equal 2, GoGame.size
+  end
+
+  def test_save_load_save
+    g = GoGame.new
+    g.save
+    g_loaded = GoGame.load(0)
+    g_loaded.set(2, 3, GoGame::Colors::White)
+    g_loaded.save
+    g_loaded_again = GoGame.load(0)
+
+    assert_equal 1, GoGame.size
+    assert_equal 0, g_loaded_again.id
   end
 
   def test_game_set_overwrites
