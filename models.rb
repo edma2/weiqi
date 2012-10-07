@@ -30,14 +30,15 @@ class Board
 
   # An array of [x, y] pairs representing liberties of the specified stone
   def liberties(stone, visited)
-    unvisited_neighbors = neighbors(stone).reject { |pos| visited.include?(pos) }
-    unvisited_neighbors.inject([]) do |result, pos|
-      nx, ny = pos
-      nstone = get(nx, ny)
-      if nstone.nil?
-        result + [[nx, ny]]
-      elsif stone.color == nstone.color
-        result + liberties(nstone, visited + [[stone.x, stone.y]])
+    neighbors(stone).inject([]) do |result, pos|
+      x, y = pos
+      neighbor = get(x, y)
+      if visited.include?([x, y])
+        result
+      elsif neighbor.nil?
+        result + [[x, y]]
+      elsif stone.color == neighbor.color
+        result + liberties(neighbor, visited + [[stone.x, stone.y]])
       else
         result
       end
