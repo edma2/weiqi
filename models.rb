@@ -1,6 +1,69 @@
 require 'json'
 require './init/redis'
 
+class Board
+  def initialize(stones)
+    @grid = (0..19).map { |i| {} }
+    stones.each do |stone|
+      @grid[stone.x][stone.y] = stone
+    end
+  end
+
+  # returns nil if out of bounds
+  def get(x, y)
+    @grid[x][y]
+  end
+
+  def in_bounds(x, y)
+    (0..19).include?(x) && (0..19).include?(y)
+  end
+
+  def neighbors(stone)
+    x, y = stone.x, stone.y
+    n = []
+    n << [x+1, y] if in_bounds(x+1, y)
+    n << [x-1, y] if in_bounds(x-1, y)
+    n << [x, y+1] if in_bounds(x, y+1)
+    n << [x, y-1] if in_bounds(x, y-1)
+    n
+  end
+
+  # An array of [x, y] pairs representing liberties of the specified stone
+  def liberties(stone, visited)
+    unvisited_neighbors = neighbors(stone).reject { |pos| visited.include?(pos) }
+    unvisited_neighbors.inject([]) do |result, pos|
+      nx, ny = pos
+      nstone = get(nx, ny)
+      if nstone.nil?
+        result + [[nx, ny]]
+      elsif stone.color == nstone.color
+        result + liberties(nstone, visited + [[stone.x, stone.y]])
+      else
+        result
+      end
+    end.uniq
+  end
+
+  def liberty_count(x, y)
+    return 0 if get(x, y).nil?
+    liberties(get(x, y), []).size
+  end
+
+  def pprint
+    (0..19).each do |y|
+      line = (0..19).map do |x|
+        stone = get(x, y)
+        if stone.nil?
+          '.'
+        else
+          stone.color == 0 ? 'b' : 'w'
+        end
+      end.join
+      puts line
+    end
+  end
+end
+
 class Stone
   attr_reader :x, :y, :color
 

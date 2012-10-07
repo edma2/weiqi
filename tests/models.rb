@@ -6,6 +6,45 @@ class GoGameTest < Test::Unit::TestCase
     REDIS.flushdb
   end
 
+  def test_liberty_count
+    # ...w.
+    # ..bbb
+    # wb.w.
+    # wwbbb
+    # .w.wb
+    b = Board.new([Stone.new(3, 0, 1),
+                   Stone.new(2, 1, 0),
+                   Stone.new(3, 1, 0),
+                   Stone.new(4, 1, 0),
+                   Stone.new(0, 2, 1),
+                   Stone.new(1, 2, 0),
+                   Stone.new(3, 2, 1),
+                   Stone.new(0, 3, 1),
+                   Stone.new(1, 3, 1),
+                   Stone.new(2, 3, 0),
+                   Stone.new(3, 3, 0),
+                   Stone.new(4, 3, 0),
+                   Stone.new(1, 4, 1),
+                   Stone.new(3, 4, 1),
+                   Stone.new(4, 4, 0)])
+
+    assert_equal 2, b.liberty_count(3, 0)
+    assert_equal 6, b.liberty_count(2, 1)
+    assert_equal 6, b.liberty_count(3, 1)
+    assert_equal 6, b.liberty_count(4, 1)
+    assert_equal 4, b.liberty_count(0, 2)
+    assert_equal 2, b.liberty_count(1, 2)
+    assert_equal 2, b.liberty_count(3, 2)
+    assert_equal 4, b.liberty_count(0, 3)
+    assert_equal 4, b.liberty_count(1, 3)
+    assert_equal 6, b.liberty_count(2, 3)
+    assert_equal 6, b.liberty_count(3, 3)
+    assert_equal 6, b.liberty_count(4, 3)
+    assert_equal 4, b.liberty_count(1, 4)
+    assert_equal 2, b.liberty_count(3, 4)
+    assert_equal 6, b.liberty_count(4, 4)
+  end
+
   def test_save_load
     g1 = GoGame.new
     g2 = GoGame.new
