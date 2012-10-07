@@ -1,6 +1,12 @@
 require 'sinatra'
 require './models'
 
+helpers do
+  def missing?(params, names)
+    names.select { |name| params[name].nil? }.size > 0
+  end
+end
+
 get '/' do
   'hello world!'
 end
@@ -19,4 +25,22 @@ post '/game' do
   g = GoGame.new
   g.save
   200
+end
+
+post '/game/:id' do
+  return 400 if missing?(params, [:x, :y, :color])
+
+  x = params[:x].to_i
+  y = params[:y].to_i
+  color = params[:color].to_i
+
+  if x <= 19 && y <= 19 && [0, 1].include?(color)
+    g = GoGame.load(params[:id])
+    return 404 unless g
+    g.set(x, y, color)
+    g.save
+    200
+  else
+    400
+  end
 end
