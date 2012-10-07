@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'haml'
 require './models'
 
 helpers do
@@ -19,6 +20,13 @@ end
 get '/game/:id' do
   g = GoGame.load(params[:id])
   g ? g.to_json : 404
+end
+
+get '/game/:id/play' do
+  @g = GoGame.load(params[:id])
+  return 404 if @g.nil?
+
+  haml :play
 end
 
 post '/game' do
