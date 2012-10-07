@@ -25,7 +25,7 @@ end
 get '/game/:id/:color/play' do
   @g = GoGame.load(params[:id])
   return 404 if @g.nil?
-
+  @color = params[:color]
   haml :play
 end
 

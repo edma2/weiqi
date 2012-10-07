@@ -17,7 +17,8 @@ $(document).ready(function(){ // jQuery way
 });
 
 function boardClick(coord) {
-  $.post("/game/0/add?x=" + coord.i + "&y=" + coord.j + "&color=1", {
-    success: function(data) { board.set(coord, JGO_WHITE); }
+  color = $("#board").attr("side")
+  $.post("/game/0/" + color + "/move?x=" + coord.i + "&y=" + coord.j, {
+    success: function(data) { board.set(coord, color == "0" ? JGO_BLACK : JGO_WHITE); }
   });
 }
