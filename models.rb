@@ -2,10 +2,7 @@ require 'json'
 require './init/redis'
 
 class Board
-  attr_reader :stones
-
   def initialize(stones)
-    @stones = stones
     @grid = (0..19).map { |i| {} }
     stones.each do |stone|
       @grid[stone.x][stone.y] = stone
@@ -48,22 +45,24 @@ class Board
     end.uniq
   end
 
+  def stones
+    @grid.map { |column| column.values }.flatten
+  end
+
   def delete_stones(stones)
     stones.each do |stone|
-      @grid[stone.x][stone.y] = nil
-      @stones.delete_if { |s| s == stone }
+      @grid[stone.x].delete(stone.y)
     end
   end
 
   def play(stone)
-    @stones.push(stone)
     @grid[stone.x][stone.y] = stone
     # Delete opposite color first to enforce capture before self-capture rule.
-    to_delete = @stones.select do |s|
+    to_delete = stones.select do |s|
       s.color != stone.color && liberty_count(s.x, s.y) == 0
     end
     delete_stones(to_delete)
-    to_delete = @stones.select do |s|
+    to_delete = stones.select do |s|
       s.color == stone.color && liberty_count(s.x, s.y) == 0
     end
     delete_stones(to_delete)

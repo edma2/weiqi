@@ -24,7 +24,10 @@ end
 
 get '/game/:id/:color/play' do
   @g = GoGame.load(params[:id])
-  return 404 if @g.nil?
+  if @g.nil?
+    @g = GoGame.new
+    @g.save
+  end
   @color = params[:color]
   haml :play
 end
