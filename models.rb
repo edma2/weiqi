@@ -1,23 +1,41 @@
-require 'set'
 require 'json'
 require './init/redis'
 
-# [
-#   { x: 5,
-#     y: 8,
-#     color: w },
-#   { x: 14,
-#     y: 3,
-#     color: b },
-#   ...
-# ]
-class GoGame
-  attr_reader :id
+class Stone
+  attr_reader :x, :y, :color
 
   module Colors
-    Black = 0
-    White = 1
+    BLACK = 0
+    WHITE = 1
   end
+
+  def initialize(x, y, color)
+    @x = x
+    @y = y
+    @color = color
+  end
+
+  class << self
+    def from_json(s)
+      from_hash(JSON.parse(s))
+    end
+
+    def from_hash(h)
+      Stone.new(h['x'], h['y'], h['color'])
+    end
+  end
+
+  def to_hash
+    { 'x' => x, 'y' => y, 'color' => color }
+  end
+
+  def to_json
+    JSON.generate(to_hash)
+  end
+end
+
+class GoGame
+  attr_reader :id
 
   class << self
     def next_id
@@ -45,30 +63,31 @@ class GoGame
       if json.nil?
         nil
       else
-        GoGame.new(id, JSON.parse(json).to_set)
+        stones = JSON.parse(json).map { |s| Stone.from_json(s) }
+        GoGame.new(id, stones)
       end
     end
   end
 
-  def initialize(id = nil, state = Set.new)
+  def initialize(id = nil, stones = [])
     @id = id # nil unless saved or fetched from store
-    @state = state
+    @stones = stones
   end
 
   def key
     @id.nil? ? nil : GoGame.key(@id)
   end
 
-  def state
-    @state.to_a
+  def stones
+    @stones.to_a
   end
 
   def to_json
-    JSON.generate(state)
+    JSON.generate(stones.map { |s| s.to_json })
   end
 
   def set(x, y, color)
-    @state.add({ 'x' => x, 'y' => y, 'color' => color })
+    @stones.push(Stone.new(x, y, color))
   end
 
   def save
@@ -81,6 +100,6 @@ class GoGame
   end
 
   def unset(x, y)
-    @state.delete_if { |cell| cell['x'] == x && cell['y'] == y }
+    @stones.delete_if { |s| s.x == x && s.y == y }
   end
 end
