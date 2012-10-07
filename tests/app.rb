@@ -49,4 +49,11 @@ class AppTest < Test::Unit::TestCase
     h = JSON.parse(last_response.body)
     assert_equal [], h
   end
+
+  def test_delete_game
+    post '/game'
+    post '/game/0/delete'
+
+    assert_equal 0, GoGame.size
+  end
 end

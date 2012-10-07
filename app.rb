@@ -27,6 +27,13 @@ post '/game' do
   200
 end
 
+post '/game/:id/delete' do
+  g = GoGame.load(params[:id])
+  return 404 unless g
+  g.delete
+  200
+end
+
 post '/game/:id/add' do
   return 400 if missing?(params, [:x, :y, :color])
 
