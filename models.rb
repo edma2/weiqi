@@ -15,14 +15,8 @@ class Stone
     @color = color
   end
 
-  class << self
-    def from_json(s)
-      from_hash(JSON.parse(s))
-    end
-
-    def from_hash(h)
-      Stone.new(h['x'], h['y'], h['color'])
-    end
+  def self.from_hash(h)
+    Stone.new(h['x'], h['y'], h['color'])
   end
 
   def to_hash
@@ -63,7 +57,7 @@ class GoGame
       if json.nil?
         nil
       else
-        stones = JSON.parse(json).map { |s| Stone.from_json(s) }
+        stones = JSON.parse(json).map { |h| Stone.from_hash(h) }
         GoGame.new(id, stones)
       end
     end
@@ -83,7 +77,7 @@ class GoGame
   end
 
   def to_json
-    JSON.generate(stones.map { |s| s.to_json })
+    JSON.generate(stones.map { |s| s.to_hash })
   end
 
   def set(x, y, color)

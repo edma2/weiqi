@@ -38,18 +38,6 @@ class AppTest < Test::Unit::TestCase
     assert_equal 0, h[0]['color']
   end
 
-  def test_remove_piece
-    post '/game'
-    post '/game/0/add?x=4&y=3&color=0'
-
-    post '/game/0/remove?x=4&y=3'
-    assert_equal 200, last_response.status
-
-    get '/game/0'
-    h = JSON.parse(last_response.body)
-    assert_equal [], h
-  end
-
   def test_delete_game
     post '/game'
     post '/game/0/delete'
