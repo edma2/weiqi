@@ -27,7 +27,7 @@ post '/game' do
   200
 end
 
-post '/game/:id' do
+post '/game/:id/add' do
   return 400 if missing?(params, [:x, :y, :color])
 
   x = params[:x].to_i
@@ -38,6 +38,23 @@ post '/game/:id' do
     g = GoGame.load(params[:id])
     return 404 unless g
     g.set(x, y, color)
+    g.save
+    200
+  else
+    400
+  end
+end
+
+post '/game/:id/remove' do
+  return 400 if missing?(params, [:x, :y])
+
+  x = params[:x].to_i
+  y = params[:y].to_i
+
+  if x <= 19 && y <= 19
+    g = GoGame.load(params[:id])
+    return 404 unless g
+    g.unset(x, y)
     g.save
     200
   else
