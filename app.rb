@@ -22,7 +22,7 @@ get '/game/:id' do
   g ? g.to_json : 404
 end
 
-get '/game/:id/play' do
+get '/game/:id/:color/play' do
   @g = GoGame.load(params[:id])
   return 404 if @g.nil?
 
@@ -42,8 +42,8 @@ post '/game/:id/delete' do
   200
 end
 
-post '/game/:id/add' do
-  return 400 if missing?(params, [:x, :y, :color])
+post '/game/:id/:color/move' do
+  return 400 if missing?(params, [:x, :y])
 
   x = params[:x].to_i
   y = params[:y].to_i
@@ -52,7 +52,8 @@ post '/game/:id/add' do
   if x <= 19 && y <= 19 && [0, 1].include?(color)
     g = GoGame.load(params[:id])
     return 404 unless g
-    g.set(x, y, color)
+    stone = Stone.new(x, y, color)
+    g.play(stone)
     g.save
     200
   else

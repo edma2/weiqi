@@ -25,17 +25,18 @@ class AppTest < Test::Unit::TestCase
     get '/game'
     assert last_response.body.include?('[0,1]')
 
-    post '/game/0/add?x=44&y=3&color=0'
+    post '/game/0/1/move?x=44&y=3'
     assert_equal 400, last_response.status
 
-    post '/game/0/add?x=4&y=3&color=0'
+    post '/game/0/1/move?x=4&y=3'
+    puts last_response.body
     assert_equal 200, last_response.status
 
     get '/game/0'
     h = JSON.parse(last_response.body)
     assert_equal 4, h[0]['x']
     assert_equal 3, h[0]['y']
-    assert_equal 0, h[0]['color']
+    assert_equal 1, h[0]['color']
   end
 
   def test_delete_game

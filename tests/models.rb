@@ -135,24 +135,4 @@ class GoGameTest < Test::Unit::TestCase
     g.delete
     assert_equal GoGame.size, 0
   end
-
-  def test_game_set_stone
-    g = GoGame.new
-    g.set(5, 9, Stone::Colors::BLACK)
-    g.save
-    g_loaded = GoGame.load(0)
-
-    assert_equal 0, g_loaded.id
-    assert_equal 1, g_loaded.stones.size
-    assert_equal 5, g_loaded.stones[0].x
-    assert_equal 9, g_loaded.stones[0].y
-    assert_equal Stone::Colors::BLACK, g_loaded.stones[0].color
-  end
-
-  def test_game_unset_stone
-    g = GoGame.new
-    g.set(5, 9, Stone::Colors::BLACK)
-    g.unset(5, 9)
-    assert_equal [], g.stones
-  end
 end

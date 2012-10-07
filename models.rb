@@ -2,6 +2,8 @@ require 'json'
 require './init/redis'
 
 class Board
+  attr_reader :stones
+
   def initialize(stones)
     @stones = stones
     @grid = (0..19).map { |i| {} }
@@ -158,16 +160,14 @@ class GoGame
     @id.nil? ? nil : GoGame.key(@id)
   end
 
-  def stones
-    @stones.to_a
-  end
-
   def to_json
-    JSON.generate(stones.map { |s| s.to_hash })
+    JSON.generate(@stones.map { |s| s.to_hash })
   end
 
-  def set(x, y, color)
-    @stones.push(Stone.new(x, y, color))
+  def play(stone)
+    b = Board.new(@stones)
+    b.play(stone)
+    @stones = b.stones
   end
 
   def save
@@ -177,9 +177,5 @@ class GoGame
 
   def delete
     REDIS.del(key) if key
-  end
-
-  def unset(x, y)
-    @stones.delete_if { |s| s.x == x && s.y == y }
   end
 end
