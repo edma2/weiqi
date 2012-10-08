@@ -2,24 +2,24 @@ require 'sinatra'
 require 'haml'
 require './models'
 
-get '/game' do
+get '/' do
   ids = GoGame.all_ids
   JSON.generate(ids)
 end
 
-get '/game/:id' do
+get '/:id' do
   g = GoGame.load(params[:id])
   g ? g.to_json : 404
 end
 
-get '/game/:id/:color/play' do
+get '/:id/:color/play' do
   id = params[:id].to_i
   @g = GoGame.load(id) || GoGame.create(id)
   @color = params[:color]
   haml :play
 end
 
-post '/game/:id/:color/move' do
+post '/:id/:color/move' do
   return 400 if params[:x].nil? || params[:y].nil?
 
   x = params[:x].to_i
