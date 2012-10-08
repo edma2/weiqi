@@ -56,6 +56,7 @@ class Board
   end
 
   def play(stone)
+    return unless @grid[stone.x][stone.y].nil?
     @grid[stone.x][stone.y] = stone
     # Delete opposite color first to enforce capture before self-capture rule.
     to_delete = stones.select do |s|
