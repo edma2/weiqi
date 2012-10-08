@@ -4,7 +4,7 @@ require './init/redis'
 
 Pusher.app_id = '29209'
 Pusher.key = 'c060ac327a245194582b'
-Pusher.secret = 'a42508215fc59f711c45'
+Pusher.secret = 'xxxxxxxxxxxxxxxxxx'
 
 class Board
   def initialize(stones)
