@@ -3,8 +3,8 @@ require 'haml'
 require './models'
 
 get '/' do
-  ids = GoGame.all_ids
-  JSON.generate(ids)
+  @ids = GoGame.all_ids
+  haml :index
 end
 
 get '/:id' do

@@ -1,0 +1,10 @@
+!!! 5
+%html
+  %head
+    %title weiqi by Eugene Ma
+  %body
+    %h1 Current Games
+    - @ids.each do |id|
+      %h1= "Game: #{id}"
+      %a{ :href => "/#{id}/0/play" } Play as black
+      %a{ :href => "/#{id}/1/play" } Play as white
