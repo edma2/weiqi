@@ -1,5 +1,10 @@
 require 'json'
+require 'pusher'
 require './init/redis'
+
+Pusher.app_id = '29209'
+Pusher.key = 'c060ac327a245194582b'
+Pusher.secret = 'a42508215fc59f711c45'
 
 class Board
   def initialize(stones)
@@ -171,6 +176,7 @@ class GoGame
     b = Board.new(@stones)
     b.play(stone)
     @stones = b.stones
+    Pusher['my-channel'].trigger('board-state-change', to_json)
   end
 
   def save(id = @id)
