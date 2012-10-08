@@ -96,21 +96,16 @@ class GoGameTest < Test::Unit::TestCase
     g2 = GoGame.new
 
     assert_equal 0, GoGame.size
+    g1.save(0)
+    g2.save(1)
 
-    g1.save
-    assert_equal 1, GoGame.next_id
-    assert_equal g1.id, GoGame.load(0).id
-
-    g2.save
-    assert_equal 2, GoGame.next_id
-    assert_equal g2.id, GoGame.load(1).id
-
+    assert_equal 0, GoGame.load(0).id
+    assert_equal 1, GoGame.load(1).id
     assert_equal 2, GoGame.size
   end
 
   def test_save_load_save
-    g = GoGame.new
-    g.save
+    g = GoGame.create(0)
     g_loaded = GoGame.load(0)
     g_loaded.save
     g_loaded_again = GoGame.load(0)
@@ -122,7 +117,7 @@ class GoGameTest < Test::Unit::TestCase
   def test_game_delete
     g = GoGame.new
 
-    g.save
+    g.save(0)
     assert_equal GoGame.size, 1
     g.delete
     assert_equal GoGame.size, 0

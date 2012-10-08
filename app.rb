@@ -2,16 +2,6 @@ require 'sinatra'
 require 'haml'
 require './models'
 
-helpers do
-  def missing?(params, names)
-    names.select { |name| params[name].nil? }.size > 0
-  end
-end
-
-get '/' do
-  'hello world!'
-end
-
 get '/game' do
   ids = GoGame.all_ids
   JSON.generate(ids)
@@ -23,30 +13,14 @@ get '/game/:id' do
 end
 
 get '/game/:id/:color/play' do
-  @g = GoGame.load(params[:id])
-  if @g.nil?
-    @g = GoGame.new
-    @g.save
-  end
+  id = params[:id].to_i
+  @g = GoGame.load(id) || GoGame.create(id)
   @color = params[:color]
   haml :play
 end
 
-post '/game' do
-  g = GoGame.new
-  g.save
-  200
-end
-
-post '/game/:id/delete' do
-  g = GoGame.load(params[:id])
-  return 404 unless g
-  g.delete
-  200
-end
-
 post '/game/:id/:color/move' do
-  return 400 if missing?(params, [:x, :y])
+  return 400 if params[:x].nil? || params[:y].nil?
 
   x = params[:x].to_i
   y = params[:y].to_i

@@ -13,14 +13,9 @@ class AppTest < Test::Unit::TestCase
     REDIS.flushdb
   end
 
-  def test_get_root
-    get '/'
-    assert last_response.body.include?('hello world!')
-  end
-
   def test_post_and_get_games
-    post '/game'
-    post '/game'
+    GoGame.create(0)
+    GoGame.create(1)
 
     get '/game'
     assert last_response.body.include?('[0,1]')
@@ -37,12 +32,5 @@ class AppTest < Test::Unit::TestCase
     assert_equal 4, h[0]['x']
     assert_equal 3, h[0]['y']
     assert_equal 1, h[0]['color']
-  end
-
-  def test_delete_game
-    post '/game'
-    post '/game/0/delete'
-
-    assert_equal 0, GoGame.size
   end
 end

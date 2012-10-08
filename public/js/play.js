@@ -2,7 +2,8 @@ $(document).ready(function(){ // jQuery way
   board = jgo_generateBoard($("#board"));
   board.click = boardClick;
 
-  $.ajax("/game/0", {
+  game_id = $("#board").attr("game_id")
+  $.ajax("/game/" + game_id, {
     success:
     function(data) {
       var nodes = JSON.parse(data)
@@ -18,7 +19,8 @@ $(document).ready(function(){ // jQuery way
 
 function boardClick(coord) {
   color = $("#board").attr("side")
-  $.post("/game/0/" + color + "/move?x=" + coord.i + "&y=" + coord.j, {
+  game_id = $("#board").attr("game_id")
+  $.post("/game/" + game_id + "/" + color + "/move?x=" + coord.i + "&y=" + coord.j, {
     success: function(data) { board.set(coord, color == "0" ? JGO_BLACK : JGO_WHITE); }
   });
 }

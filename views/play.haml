@@ -7,4 +7,4 @@
     %script{ :type => "text/javascript", :src => "/js/play.js" }
     %title weiqi by Eugene Ma
   %body
-    .jgo_board#board{ :side => @color }
+    .jgo_board#board{ :game_id => @g.id, :side => @color }

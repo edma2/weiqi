@@ -120,10 +120,6 @@ class GoGame
   attr_reader :id
 
   class << self
-    def next_id
-      size
-    end
-
     def key(id)
       "weiqi-#{id}"
     end
@@ -146,13 +142,20 @@ class GoGame
         nil
       else
         stones = JSON.parse(json).map { |h| Stone.from_hash(h) }
-        GoGame.new(id, stones)
+        g = GoGame.new(stones)
+        g.id = id
+        g
       end
+    end
+
+    def create(id, stones = [])
+      g = GoGame.new(stones)
+      g.save(id)
+      g
     end
   end
 
-  def initialize(id = nil, stones = [])
-    @id = id # nil unless saved or fetched from store
+  def initialize(stones = [])
     @stones = stones
   end
 
@@ -170,12 +173,14 @@ class GoGame
     @stones = b.stones
   end
 
-  def save
-    @id ||= GoGame.next_id
+  def save(id = @id)
+    @id = id
     REDIS.set(key, to_json)
   end
 
   def delete
     REDIS.del(key) if key
   end
+
+  attr_writer :id
 end
