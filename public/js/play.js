@@ -15,17 +15,17 @@ function boardClick(coord) {
 }
 
 $(document).ready(function(){ // jQuery way
+  game_id = $("#board").attr("game_id")
   board = jgo_generateBoard($("#board"));
   board.click = boardClick;
 
   var pusher = new Pusher('c060ac327a245194582b'); // weiqi app key
-  var channel = pusher.subscribe('my-channel');
+  var channel = pusher.subscribe('weiqi-' + game_id);
   channel.bind('board-state-change', function(data) {
     console.log("triggered!");
     fillBoard(board, data)
   });
 
-  game_id = $("#board").attr("game_id")
   $.ajax("/" + game_id, {
     success: function(data) { fillBoard(board, JSON.parse(data)) }
   });

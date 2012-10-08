@@ -176,7 +176,7 @@ class GoGame
     b = Board.new(@stones)
     b.play(stone)
     @stones = b.stones
-    Pusher['my-channel'].trigger('board-state-change', to_json)
+    Pusher["weiqi-#{id}"].trigger('board-state-change', to_json)
   end
 
   def save(id = @id)
