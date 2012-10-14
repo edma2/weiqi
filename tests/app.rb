@@ -17,9 +17,6 @@ class AppTest < Test::Unit::TestCase
     GoGame.create(0)
     GoGame.create(1)
 
-    get '/'
-    assert last_response.body.include?('[0,1]')
-
     post '/0/1/move?x=44&y=3'
     assert_equal 400, last_response.status
 
