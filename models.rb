@@ -128,8 +128,9 @@ class Board
     end
   end
 
-  def to_json
-    JSON.generate(stones.map { |s| s.to_hash })
+  # self -> [ { x: 8, y: 9, color: 123}, ... ]
+  def to_serializable
+    stones.map { |s| s.to_serializable }
   end
 end
 
@@ -142,17 +143,20 @@ class Stone
     @color = color
   end
 
-  def self.from_hash(h)
+  # { x: 8, y: 9, color: 123} -> Stone
+  def self.from_serializable(h)
     Stone.new(h['x'], h['y'], h['color'])
   end
 
-  def to_hash
+  # self -> { x: 8, y: 9, color: 123}
+  def to_serializable
     { 'x' => x, 'y' => y, 'color' => color }
   end
 end
 
 class GoGame
   attr_accessor :id # only set if exists in db
+  attr_reader :color
 
   class << self
     def key(id)
@@ -172,8 +176,10 @@ class GoGame
     end
 
     def from_json(json)
-      stones = JSON.parse(json).map { |h| Stone.from_hash(h) }
-      GoGame.new(stones)
+      hash = JSON.parse(json)
+      stones = hash['stones'].map { |h| Stone.from_serializable(h) }
+      color = hash['color']
+      GoGame.new(color, stones)
     end
 
     def load(id)
@@ -187,14 +193,15 @@ class GoGame
       end
     end
 
-    def create(id, stones = [])
-      g = GoGame.new(stones)
+    def create(id, color = 0, stones = [])
+      g = GoGame.new(color, stones)
       g.save(id)
       g
     end
   end
 
-  def initialize(stones = [])
+  def initialize(color = 0, stones = [])
+    @color = color
     @board = Board.new(stones)
   end
 
@@ -203,12 +210,21 @@ class GoGame
   end
 
   def to_json
-    @board.to_json
-    # TODO: Add metadata... like whose turn it is
+    JSON.generate(to_serializable)
+  end
+
+  def to_serializable
+    { 'stones' => @board.to_serializable,
+      'color' => @color }
+  end
+
+  def stones
+    @board.stones
   end
 
   def play(stone)
     @board.play!(stone)
+    @color = (@color == 1) ? 0 : 1
     Pusher["weiqi-#{id}"].trigger('board-state-change', to_json)
   end
 

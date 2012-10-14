@@ -1,5 +1,6 @@
-function fillBoard(board, stones) {
+function fillBoard(board, data) {
   board.clear() // this could probably be optimized
+  var stones = data['stones']
   for (var i = 0; i < stones.length; i++) {
     stone = stones[i]
     coord = new JGOCoordinate(stone.x, stone.y);

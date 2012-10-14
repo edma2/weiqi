@@ -13,21 +13,23 @@ class AppTest < Test::Unit::TestCase
     REDIS.flushdb
   end
 
-  def test_post_and_get_games
+  def test_get_game
     GoGame.create(0)
-    GoGame.create(1)
-
-    post '/0/1/move?x=44&y=3'
-    assert_equal 400, last_response.status
-
-    post '/0/1/move?x=4&y=3'
-    puts last_response.body
-    assert_equal 200, last_response.status
 
     get '/0'
-    h = JSON.parse(last_response.body)
-    assert_equal 4, h[0]['x']
-    assert_equal 3, h[0]['y']
-    assert_equal 1, h[0]['color']
+    g = GoGame.from_json(last_response.body)
+    assert_equal 0, g.color
+    assert_equal [], g.stones
+  end
+
+  def test_post_moves
+    GoGame.create(0)
+
+    post '/0/0/move?x=4&y=3'
+    g = GoGame.load(0)
+    assert_equal 1, g.color
+    assert_equal 0, g.stones[0].color
+    assert_equal 4, g.stones[0].x
+    assert_equal 3, g.stones[0].y
   end
 end
