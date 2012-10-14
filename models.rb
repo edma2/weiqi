@@ -3,7 +3,10 @@ require 'pusher'
 require 'set'
 require './init/redis'
 
-# TODO: ko-rule
+# TODO:
+#   ko-rule
+#   push deltas instead of entire state
+#   represent state as history
 
 Pusher.app_id = ENV['PUSHER_APP_ID']
 Pusher.key = ENV['PUSHER_KEY']
