@@ -2,6 +2,16 @@ require 'test/unit'
 require './tests/helper'
 require './models'
 
+class Stone
+  def eql?(other)
+    x == other.x && y == other.y
+  end
+
+  def hash
+    [x, y].hash
+  end
+end
+
 class GoGameTest < Test::Unit::TestCase
   def setup
     REDIS.flushdb
@@ -28,11 +38,11 @@ class GoGameTest < Test::Unit::TestCase
     .**.$
     ....$
     "
-    puts
-    b.pprint
-    b.liberty_counts(0).each do |stone, count|
-      puts "(#{stone.x}, #{stone.y}): #{count}"
-    end
+
+    counts = b.liberty_counts(0)
+    assert_equal 6, counts[Stone.new(2, 0, 0)]
+    assert_equal 6, counts[Stone.new(1, 1, 0)]
+    assert_equal 6, counts[Stone.new(2, 1, 0)]
   end
 
   def test_illegal_moves
