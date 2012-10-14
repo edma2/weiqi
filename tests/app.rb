@@ -13,6 +13,12 @@ class AppTest < Test::Unit::TestCase
     REDIS.flushdb
   end
 
+  def test_create_game
+    assert_nil GoGame.load(0)
+    get '/0/0/play'
+    assert_not_nil GoGame.load(0)
+  end
+
   def test_get_game
     GoGame.create(0)
 
