@@ -3,6 +3,8 @@ require 'pusher'
 require 'set'
 require './init/redis'
 
+# TODO: ko-rule
+
 Pusher.app_id = ENV['PUSHER_APP_ID']
 Pusher.key = ENV['PUSHER_KEY']
 Pusher.secret = ENV['PUSHER_SECRET']
@@ -228,14 +230,13 @@ class GoGame
   end
 
   def play(stone)
-    if stone.color == @color
-      if @board.play!(stone)
-        @color = (@color == 1) ? 0 : 1
-        Pusher["weiqi-#{id}"].trigger('board-state-change', to_json)
-        return true
-      end
+    if stone.color == @color && @board.play!(stone)
+      @color = (@color == 1) ? 0 : 1
+      Pusher["weiqi-#{id}"].trigger('board-state-change', to_json)
+      true
+    else
+      false
     end
-    false
   end
 
   def save(id = @id)
