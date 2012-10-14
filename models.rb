@@ -76,12 +76,12 @@ class Board
   def chain_liberty_counts(stone)
     counts = {}
     chain = []
-    empty_intersections = Set.new
+    liberties = Set.new
     dfs(stone) do |stone|
-      empty_intersections |= Set.new(empty_adjacent_intersections(stone))
+      liberties |= Set.new(empty_adjacent_intersections(stone))
       chain << stone
     end
-    chain.each { |stone| counts[stone] = empty_intersections.size }
+    chain.each { |stone| counts[stone] = liberties.size }
     counts
   end
 
