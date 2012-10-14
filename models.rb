@@ -152,7 +152,7 @@ class Stone
 end
 
 class GoGame
-  attr_reader :id
+  attr_accessor :id # only set if exists in db
 
   class << self
     def key(id)
@@ -220,6 +220,4 @@ class GoGame
   def delete
     REDIS.del(key) if key
   end
-
-  attr_writer :id
 end
