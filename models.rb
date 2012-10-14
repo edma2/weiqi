@@ -55,11 +55,11 @@ class Board
     [[x-1, y], [x+1, y], [x, y-1], [x, y+1]]
   end
 
-  # Number of empty adjacent intersections. Used to count liberties.
-  def empty_adjacent_intersections_count(stone)
+  # Empty adjacent intersections. Used to count liberties.
+  def empty_adjacent_intersections(stone)
     adjacent_intersections(stone).select do |x, y|
       (0..19).include?(x) && (0..19).include?(y) && get(x, y).nil?
-    end.size
+    end
   end
 
   # Return a hash mapping stones with specified color to liberty counts.
@@ -76,12 +76,12 @@ class Board
   def chain_liberty_counts(stone)
     counts = {}
     chain = []
-    count = 0
+    empty_intersections = Set.new
     dfs(stone) do |stone|
-      count += empty_adjacent_intersections_count(stone)
+      empty_intersections |= Set.new(empty_adjacent_intersections(stone))
       chain << stone
     end
-    chain.each { |stone| counts[stone] = count }
+    chain.each { |stone| counts[stone] = empty_intersections.size }
     counts
   end
 

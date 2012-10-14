@@ -22,6 +22,19 @@ class GoGameTest < Test::Unit::TestCase
     assert_nil b.get(3, 4)
   end
 
+  def test_liberty_counts
+    b = load_board "
+    ..*.$
+    .**.$
+    ....$
+    "
+    puts
+    b.pprint
+    b.liberty_counts(0).each do |stone, count|
+      puts "(#{stone.x}, #{stone.y}): #{count}"
+    end
+  end
+
   def test_illegal_moves
     g = GoGame.new
     assert !g.play(Stone.new(0, 0, 1)) # white went first
