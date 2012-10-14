@@ -3,9 +3,9 @@ require 'pusher'
 require 'set'
 require './init/redis'
 
-Pusher.app_id = '29209'
-Pusher.key = 'c060ac327a245194582b'
-Pusher.secret = 'xxxxxxxxxxxxxxxxxx'
+Pusher.app_id = ENV['PUSHER_APP_ID']
+Pusher.key = ENV['PUSHER_KEY']
+Pusher.secret = ENV['PUSHER_SECRET']
 
 class Board
   def initialize(stones)
@@ -127,15 +127,14 @@ class Board
       puts line
     end
   end
+
+  def to_json
+    JSON.generate(stones.map { |s| s.to_hash })
+  end
 end
 
 class Stone
   attr_reader :x, :y, :color
-
-  module Colors
-    BLACK = 0
-    WHITE = 1
-  end
 
   def initialize(x, y, color)
     @x = x
@@ -149,10 +148,6 @@ class Stone
 
   def to_hash
     { 'x' => x, 'y' => y, 'color' => color }
-  end
-
-  def to_json
-    JSON.generate(to_hash)
   end
 end
 
@@ -176,13 +171,17 @@ class GoGame
       all_ids.size
     end
 
+    def from_json(json)
+      stones = JSON.parse(json).map { |h| Stone.from_hash(h) }
+      GoGame.new(stones)
+    end
+
     def load(id)
       json = REDIS.get(key(id))
       if json.nil?
         nil
       else
-        stones = JSON.parse(json).map { |h| Stone.from_hash(h) }
-        g = GoGame.new(stones)
+        g = from_json(json)
         g.id = id
         g
       end
@@ -196,7 +195,7 @@ class GoGame
   end
 
   def initialize(stones = [])
-    @stones = stones
+    @board = Board.new(stones)
   end
 
   def key
@@ -204,13 +203,12 @@ class GoGame
   end
 
   def to_json
-    JSON.generate(@stones.map { |s| s.to_hash })
+    @board.to_json
+    # TODO: Add metadata... like whose turn it is
   end
 
   def play(stone)
-    b = Board.new(@stones)
-    b.play!(stone)
-    @stones = b.stones
+    @board.play!(stone)
     Pusher["weiqi-#{id}"].trigger('board-state-change', to_json)
   end
 
