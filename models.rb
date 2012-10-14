@@ -85,6 +85,10 @@ class Board
     stone.color == 0 ? 1 : 0
   end
 
+  def out_of_bounds(stone)
+    !(0..19).include?(stone.x) || !(0..19).include?(stone.y)
+  end
+
   # Play a stone, captured pieces are removed.
   # Returns true if play was legal.
   #
@@ -93,6 +97,7 @@ class Board
   # are captured before self-capture occurs.
   def play!(stone)
     return false unless get(stone.x, stone.y).nil?
+    return false if out_of_bounds(stone)
     add!(stone)
     [opposite_color(stone), stone.color].each do |color|
       counts = liberty_counts(color)
@@ -223,9 +228,14 @@ class GoGame
   end
 
   def play(stone)
-    @board.play!(stone)
-    @color = (@color == 1) ? 0 : 1
-    Pusher["weiqi-#{id}"].trigger('board-state-change', to_json)
+    if stone.color == @color
+      if @board.play!(stone)
+        @color = (@color == 1) ? 0 : 1
+        Pusher["weiqi-#{id}"].trigger('board-state-change', to_json)
+        return true
+      end
+    end
+    false
   end
 
   def save(id = @id)

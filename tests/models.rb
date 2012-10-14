@@ -22,6 +22,16 @@ class GoGameTest < Test::Unit::TestCase
     assert_nil b.get(3, 4)
   end
 
+  def test_illegal_moves
+    g = GoGame.new
+    assert !g.play(Stone.new(0, 0, 1)) # white went first
+    assert g.play(Stone.new(0, 0, 0)) # black legal move
+    assert !g.play(Stone.new(1, 0, 0)) # black tried to go again
+    assert !g.play(Stone.new(0, 0, 1)) # white tried overwrite
+    assert g.play(Stone.new(4, 0, 1)) # white legal move
+    assert !g.play(Stone.new(44, 1, 1)) # black out of bounds
+  end
+
   def test_save_load
     g1 = GoGame.new
     g2 = GoGame.new
