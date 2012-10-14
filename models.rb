@@ -3,9 +3,9 @@ require 'pusher'
 require 'set'
 require './init/redis'
 
-Pusher.app_id = '29209'
-Pusher.key = 'c060ac327a245194582b'
-Pusher.secret = 'a42508215fc59f711c45'
+Pusher.app_id = ENV['PUSHER_APP_ID']
+Pusher.key = ENV['PUSHER_KEY']
+Pusher.secret = ENV['PUSHER_SECRET']
 
 class Board
   def initialize(stones)
