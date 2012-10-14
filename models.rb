@@ -1,5 +1,6 @@
 require 'json'
 require 'pusher'
+require 'set'
 require './init/redis'
 
 Pusher.app_id = '29209'
@@ -14,71 +15,105 @@ class Board
     end
   end
 
-  # returns nil if out of bounds
-  def get(x, y)
-    @grid[x][y]
-  end
-
-  def in_bounds(x, y)
-    (0..19).include?(x) && (0..19).include?(y)
-  end
-
-  def neighbors(stone)
-    x, y = stone.x, stone.y
-    n = []
-    n << [x+1, y] if in_bounds(x+1, y)
-    n << [x-1, y] if in_bounds(x-1, y)
-    n << [x, y+1] if in_bounds(x, y+1)
-    n << [x, y-1] if in_bounds(x, y-1)
-    n
-  end
-
-  # An array of [x, y] pairs representing liberties of the specified stone
-  def liberties(stone, visited)
-    neighbors(stone).inject([]) do |result, pos|
-      x, y = pos
-      neighbor = get(x, y)
-      if visited.include?([x, y])
-        result
-      elsif neighbor.nil?
-        result + [[x, y]]
-      elsif stone.color == neighbor.color
-        result + liberties(neighbor, visited + [[stone.x, stone.y]])
-      else
-        result
-      end
-    end.uniq
-  end
-
+  # Construct an array of stones from grid.
   def stones
     @grid.map { |column| column.values }.flatten
   end
 
-  def delete_stones(stones)
+  # Returns the stone located at intersection (x, y).
+  # Return nil if intersection is empty or (x, y) is out of bounds.
+  def get(x, y)
+    @grid[x][y]
+  end
+
+  # Get the adjacent stones of some stone that are the same color
+  def children(node)
+    adjacent_intersections(node).map do |x, y|
+      get(x, y)
+    end.delete_if do |neighbor|
+      neighbor.nil? || neighbor.color != node.color
+    end
+  end
+
+  # Visit all nodes connected to node and of the same color.
+  def dfs(node, visited=Set.new, &visit)
+    visited << node
+    visit.call(node)
+    children(node).each do |child|
+      dfs(child, visited, &visit) unless visited.member?(child)
+    end
+  end
+
+  # Return an array of adjacent intersections (array of [x, y] pairs)
+  def adjacent_intersections(stone)
+    x, y = stone.x, stone.y
+    [[x-1, y], [x+1, y], [x, y-1], [x, y+1]]
+  end
+
+  # Number of empty adjacent intersections. Used to count liberties.
+  def empty_adjacent_intersections_count(stone)
+    adjacent_intersections(stone).select do |x, y|
+      (0..19).include?(x) && (0..19).include?(y) && get(x, y).nil?
+    end.size
+  end
+
+  # Return a hash mapping stones with specified color to liberty counts.
+  def liberty_counts(color)
+    counts = {}
     stones.each do |stone|
-      @grid[stone.x].delete(stone.y)
+      next if stone.color != color || counts.has_key?(stone)
+      counts.merge!(chain_liberty_counts(stone))
     end
+    counts
   end
 
-  def play(stone)
-    return unless @grid[stone.x][stone.y].nil?
+  # Return counts for a chain starting at stone.
+  def chain_liberty_counts(stone)
+    counts = {}
+    chain = []
+    count = 0
+    dfs(stone) do |stone|
+      count += empty_adjacent_intersections_count(stone)
+      chain << stone
+    end
+    chain.each { |stone| counts[stone] = count }
+    counts
+  end
+
+  # The opposite color of stone's color.
+  def opposite_color(stone)
+    stone.color == 0 ? 1 : 0
+  end
+
+  # Play a stone, captured pieces are removed.
+  # Returns true if play was legal.
+  #
+  # First opponent pieces are checked for removal, then
+  # stones of the same color. This is to ensure enemy stones
+  # are captured before self-capture occurs.
+  def play!(stone)
+    return false unless get(stone.x, stone.y).nil?
+    add!(stone)
+    [opposite_color(stone), stone.color].each do |color|
+      counts = liberty_counts(color)
+      counts.each do |stone, count|
+        remove!(stone) if count == 0
+      end
+    end
+    true
+  end
+
+  # Add or overwrite previous stone.
+  def add!(stone)
     @grid[stone.x][stone.y] = stone
-    # Delete opposite color first to enforce capture before self-capture rule.
-    to_delete = stones.select do |s|
-      s.color != stone.color && liberty_count(s.x, s.y) == 0
-    end
-    delete_stones(to_delete)
-    to_delete = stones.select do |s|
-      s.color == stone.color && liberty_count(s.x, s.y) == 0
-    end
-    delete_stones(to_delete)
   end
 
-  def liberty_count(x, y)
-    return 0 if get(x, y).nil?
-    liberties(get(x, y), []).size
+  # Remove a stone. No effect if the stone wasn't there.
+  def remove!(stone)
+    @grid[stone.x].delete(stone.y)
   end
 
+  # Print the board nicely.
   def pprint
     (0..19).each do |y|
       line = (0..19).map do |x|
@@ -174,7 +209,7 @@ class GoGame
 
   def play(stone)
     b = Board.new(@stones)
-    b.play(stone)
+    b.play!(stone)
     @stones = b.stones
     Pusher["weiqi-#{id}"].trigger('board-state-change', to_json)
   end
